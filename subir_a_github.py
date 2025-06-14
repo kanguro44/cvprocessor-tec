@@ -143,8 +143,8 @@ def agregar_remoto(usuario, nombre_repo="cvprocessor-tec"):
         print_color("Ya existe un remoto llamado origin. Eliminándolo...", "yellow")
         ejecutar_comando("git remote remove origin")
     
-    # Agregar remoto
-    exito, _ = ejecutar_comando(f"git remote add origin https://github.com/{usuario}/{nombre_repo}.git")
+    # Agregar remoto con token en la URL
+    exito, _ = ejecutar_comando(f"git remote add origin https://{token}@github.com/{usuario}/{nombre_repo}.git")
     if not exito:
         print_color("Error al agregar el remoto al repositorio.", "red")
         return False
@@ -161,14 +161,9 @@ def subir_a_github(usuario, token, nombre_rama="main"):
     os.environ["GIT_USERNAME"] = usuario
     os.environ["GIT_PASSWORD"] = token
     
-    # Subir código
+    # Subir código (no necesitamos variables de entorno ya que el token está en la URL)
     comando_push = f"git push -u origin {nombre_rama}"
     exito, _ = ejecutar_comando(comando_push)
-    
-    # Limpiar credenciales
-    os.environ.pop("GIT_ASKPASS", None)
-    os.environ.pop("GIT_USERNAME", None)
-    os.environ.pop("GIT_PASSWORD", None)
     
     if not exito:
         print_color(f"Error al subir el código a GitHub (rama {nombre_rama}).", "red")
@@ -191,13 +186,11 @@ def main():
     if not verificar_git():
         return False
     
-    # Solicitar credenciales
+    # Usar token proporcionado
     usuario = "kanguro44"  # Usuario de GitHub
-    print_color("\nGitHub ya no permite la autenticación con contraseña. Necesitas un token de acceso personal.", "yellow")
-    print_color("Para crear un token, ve a: https://github.com/settings/tokens", "yellow")
-    print_color("Selecciona 'Generate new token (classic)' y asegúrate de darle permisos de 'repo'", "yellow")
-    token = input("\nIngresa tu token de acceso personal de GitHub: ")
+    token = "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"  # Token de acceso personal
     nombre_repo = "cvprocessor-tec"
+    print_color(f"Usando token de acceso personal para el usuario {usuario}", "green")
     
     # Inicializar repositorio
     if not inicializar_repositorio():
