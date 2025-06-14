@@ -1108,15 +1108,15 @@ def main():
         log("Exportando resultados a Google Sheets...")
         log(f"DataFrame final tiene {len(df)} filas para exportar")
         
-        # Crear una copia del DataFrame para exportar, eliminando las columnas CV Link y CV FileName
-        # que ya no son necesarias en la visualización final porque el nombre tiene hipervínculo
-        df_export = df.copy()
-        if "CV Link" in df_export.columns:
-            df_export = df_export.drop(columns=["CV Link"])
-        if "CV FileName" in df_export.columns:
-            df_export = df_export.drop(columns=["CV FileName"])
+        # Mantener todas las columnas para asegurar que la exportación funcione correctamente
+        # Comentamos temporalmente la eliminación de columnas hasta resolver el problema
+        # df_export = df.copy()
+        # if "CV Link" in df_export.columns:
+        #     df_export = df_export.drop(columns=["CV Link"])
+        # if "CV FileName" in df_export.columns:
+        #     df_export = df_export.drop(columns=["CV FileName"])
         
-        export_to_sheets(df_export, SERVICE_ACCOUNT_FILE, SPREADSHEET_ID, SHEET_NAME)
+        export_to_sheets(df, SERVICE_ACCOUNT_FILE, SPREADSHEET_ID, SHEET_NAME)
         log("Listo. Resultados subidos a Sheets.")
 
 if __name__ == "__main__":
