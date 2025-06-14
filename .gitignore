@@ -1,63 +1,70 @@
-# Archivos de Python
+# Archivos de credenciales y configuración
+credentials.json
+.streamlit/secrets.toml
+
+# Archivos temporales y de caché
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.coverage.*
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
 
-# Archivos de entorno
+# Archivos de entorno virtual
+venv/
+env/
+ENV/
 .env
 .venv
-env/
-venv/
-ENV/
 env.bak/
 venv.bak/
 
-# Archivos temporales
-*.tmp
-*.temp
-tmp/
-temp/
+# Archivos de datos y resultados
+*.csv
+*.xlsx
+*.json
+CVs/
+CVs_Procesados/
+cvs_tmp/
+BDCandidatos/
+tmp_*.pdf
 
-# Archivos de sistema
+# Archivos del sistema
 .DS_Store
 Thumbs.db
-desktop.ini
+.directory
+*.swp
+*~
 
 # Archivos de IDE
 .idea/
 .vscode/
-*.swp
-*.swo
-*~
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
 
-# Archivos de log
-*.log
-logs/
+# Archivos de distribución
+dist/
+build/
+*.egg-info/
 
-# Archivos de datos sensibles
-credentials.json
-
-# Archivos de datos generados
-resultados.csv
-procesados.txt
-
-# Archivos de CVs (opcional, depende de si quieres incluirlos en el repositorio)
-# CVs/
-# CVs_Procesados/
+# Archivos específicos para ejecución local
+iniciar_aplicacion.py
+iniciar_aplicacion.bat
+iniciar_aplicacion.sh
+iniciar_aplicacion.command
+configurar_macos.command
+instalar_dependencias.py
+copiar_configuracion.py
+preparar_para_nube.py
