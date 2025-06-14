@@ -231,6 +231,87 @@ def fallback_regex_name(text):
     # Si no se encuentra un nombre, extraer el nombre del archivo
     return "No encontrado"
 
+def determine_knowledge_area(cv_text, subject="", university=""):
+    """
+    Determina el área de conocimiento del candidato basado en el contenido del CV,
+    el subject y la universidad de doctorado.
+    
+    Las áreas posibles son:
+    - Artes y Humanidades
+    - Ingeniería y Tecnología
+    - Medicina y Ciencias de la Vida
+    - Ciencias Naturales
+    """
+    prompt = f"""
+Analiza este CV académico y determina a cuál de estas CUATRO áreas de conocimiento pertenece el candidato:
+1. Artes y Humanidades
+2. Ingeniería y Tecnología
+3. Medicina y Ciencias de la Vida
+4. Ciencias Naturales
+
+Información adicional:
+- Subject/Área del candidato: {subject}
+- Universidad de doctorado: {university}
+
+Utiliza los criterios de clasificación de QS Rank by Subject para determinar el área.
+
+Ejemplos de clasificación:
+- Artes y Humanidades: Historia, Filosofía, Literatura, Lingüística, Artes, Diseño, Arquitectura, Arqueología, Teología, etc.
+- Ingeniería y Tecnología: Ingeniería Civil, Eléctrica, Mecánica, Química, Computación, Sistemas, TI, Telecomunicaciones, etc.
+- Medicina y Ciencias de la Vida: Medicina, Enfermería, Farmacia, Biología, Biotecnología, Veterinaria, Agricultura, Psicología, etc.
+- Ciencias Naturales: Física, Química, Matemáticas, Estadística, Geología, Ciencias Ambientales, Astronomía, etc.
+
+Analiza cuidadosamente el CV, buscando:
+1. Títulos académicos y áreas de especialización
+2. Líneas de investigación y publicaciones
+3. Proyectos y experiencia profesional
+4. Palabras clave relacionadas con disciplinas específicas
+
+Razona paso a paso y luego responde ÚNICAMENTE con una de las cuatro áreas mencionadas, sin explicaciones adicionales.
+
+CV:
+"""
+
+    try:
+        # Usar solo los primeros 6000 caracteres del CV para el análisis
+        response = openai.chat.completions.create(
+            model="gpt-4o",  # Usar GPT-4o para mejor razonamiento
+            messages=[{"role": "user", "content": prompt + cv_text[:6000]}],
+            max_tokens=200,
+            temperature=0
+        )
+        area = response.choices[0].message.content.strip()
+        
+        # Normalizar la respuesta para asegurar que sea una de las cuatro áreas
+        area_normalizada = area.lower()
+        
+        if "arte" in area_normalizada or "human" in area_normalizada:
+            return "Artes y Humanidades"
+        elif "ingenier" in area_normalizada or "tecnolog" in area_normalizada:
+            return "Ingeniería y Tecnología"
+        elif "medicina" in area_normalizada or "vida" in area_normalizada or "biolog" in area_normalizada:
+            return "Medicina y Ciencias de la Vida"
+        elif "natural" in area_normalizada or "física" in area_normalizada or "química" in area_normalizada or "matemática" in area_normalizada:
+            return "Ciencias Naturales"
+        else:
+            # Si la respuesta no coincide claramente, intentar clasificar basado en el subject
+            if subject and subject != "No encontrado":
+                subject_lower = subject.lower()
+                if any(term in subject_lower for term in ["historia", "filosofía", "literatura", "lingüística", "arte", "diseño", "arquitectura", "arqueología", "teología"]):
+                    return "Artes y Humanidades"
+                elif any(term in subject_lower for term in ["ingeniería", "tecnología", "computación", "sistemas", "telecomunicaciones", "informática", "electrónica", "mecánica", "civil"]):
+                    return "Ingeniería y Tecnología"
+                elif any(term in subject_lower for term in ["medicina", "enfermería", "farmacia", "biología", "biotecnología", "veterinaria", "agricultura", "psicología", "salud"]):
+                    return "Medicina y Ciencias de la Vida"
+                elif any(term in subject_lower for term in ["física", "química", "matemáticas", "estadística", "geología", "ambiental", "astronomía"]):
+                    return "Ciencias Naturales"
+            
+            # Si aún no se puede determinar, devolver una categoría por defecto
+            return "Ingeniería y Tecnología"  # Categoría por defecto
+    except Exception as e:
+        log(f"Error al determinar el área de conocimiento: {e}")
+        return "No encontrado"
+
 def extract_basic_data_gpt(cv_text, filename=""):
     prompt = """
 Extract ONLY the following fields from this academic CV (English or Spanish).
@@ -656,6 +737,7 @@ def process_cv(cv_path, qs_list, drive_folder_id, creds_path):
             "País de residencia o nacionalidad": "No encontrado",
             "Universidad doctorado": "No encontrado",
             "Subject": "No encontrado",
+            "Area": "No encontrado",
             "QS Rank": "No encontrado"
         }
         
@@ -679,6 +761,10 @@ def process_cv(cv_path, qs_list, drive_folder_id, creds_path):
     for k in data:
         if not data[k]:
             data[k] = "No encontrado"
+    
+    # Determinar el área de conocimiento
+    area = determine_knowledge_area(cv_text, data.get("Subject", ""), data.get("Universidad doctorado", ""))
+    data["Area"] = area
     
     # Subir CV a Google Drive y guardar el link
     drive_url = upload_file_to_drive(cv_path, filename, drive_folder_id, creds_path)
