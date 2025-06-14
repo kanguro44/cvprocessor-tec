@@ -1,0 +1,14 @@
+[browser]
+serverAddress = "globaledjobs.com"
+
+[server]
+enableCORS = false
+
+[theme]
+primaryColor = "#4CAF50"
+backgroundColor = "#f5f5f5"
+secondaryBackgroundColor = "#fafafa"
+textColor = "#37474f"
+
+[client]
+toolbarMode = "minimal"
