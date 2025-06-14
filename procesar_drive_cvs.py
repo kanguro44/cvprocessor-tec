@@ -7,6 +7,7 @@ import json
 import pandas as pd
 import gspread
 import unicodedata
+import tempfile
 from google.oauth2.service_account import Credentials
 from difflib import get_close_matches
 
@@ -26,7 +27,27 @@ except Exception as e:
     print(f"No se pudo cargar la clave de API de OpenAI desde secrets.toml: {e}")
     print("Usando clave de API de OpenAI predeterminada (esto puede no funcionar)")
 
-SERVICE_ACCOUNT_FILE = "credentials.json"
+# Función para obtener las credenciales de Google desde los secretos de Streamlit
+def get_google_credentials():
+    """Obtiene las credenciales de Google desde los secretos de Streamlit o desde un archivo local"""
+    try:
+        import streamlit as st
+        if "gcp_service_account" in st.secrets:
+            # Crear un archivo temporal con las credenciales
+            creds_dict = dict(st.secrets["gcp_service_account"])
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                json.dump(creds_dict, f)
+                temp_file = f.name
+            print(f"Credenciales de Google cargadas desde secrets.toml y guardadas en {temp_file}")
+            return temp_file
+    except Exception as e:
+        print(f"Error al cargar credenciales desde secrets: {e}")
+    
+    # Si no se pudieron cargar desde secrets, usar el archivo local
+    print("Usando archivo de credenciales local: credentials.json")
+    return "credentials.json"
+
+SERVICE_ACCOUNT_FILE = get_google_credentials()
 SPREADSHEET_ID = "1ETFM0k1QM07Csk9mcJHy9ZnS0-WkHsrNZDxYVTWxRAA"
 SHEET_NAME = "Hoja 1"
 QS_GOOGLE_SHEET_ID = "117FMF8RBEzwSLxnqEp7LUg2jZ0iACob9E9mNtvu2Ku4"
