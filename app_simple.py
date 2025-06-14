@@ -18,7 +18,7 @@ import io
 from procesar_drive_cvs import (
     extract_text_from_pdf, extract_text_from_docx,
     extract_basic_data_gpt, match_university_qs, get_qs_list_from_google_sheets,
-    upload_file_to_drive, make_hyperlink, export_to_sheets,
+    upload_file_to_drive, make_hyperlink, export_to_sheets, determine_knowledge_area,
     SERVICE_ACCOUNT_FILE, SPREADSHEET_ID, SHEET_NAME, 
     QS_GOOGLE_SHEET_ID, QS_TAB_NAME, GOOGLE_DRIVE_FOLDER_ID, OUTPUT_CSV
 )
@@ -236,6 +236,7 @@ class CVProcessor:
                             "País de residencia o nacionalidad": "No encontrado",
                             "Universidad doctorado": "No encontrado",
                             "Subject": "No encontrado",
+                            "Area": "No encontrado",
                             "QS Rank": "No encontrado"
                         }
                     else:
@@ -245,12 +246,18 @@ class CVProcessor:
                         data = extract_basic_data_gpt(cv_text, filename)
                         
                         # Buscar universidad en ranking QS
-                        self.progress = file_progress + (progress_per_file * 0.8)
+                        self.progress = file_progress + (progress_per_file * 0.7)
                         if self.qs_list:
                             self.add_log(f"Buscando universidad en ranking QS...")
                             match_qs = match_university_qs(data.get("Universidad doctorado", ""), self.qs_list)
                             data["Universidad doctorado"] = match_qs["Universidad doctorado"]
                             data["QS Rank"] = match_qs["QS Rank"]
+                        
+                        # Determinar el área de conocimiento
+                        self.progress = file_progress + (progress_per_file * 0.8)
+                        self.add_log(f"Determinando área de conocimiento...")
+                        area = determine_knowledge_area(cv_text, data.get("Subject", ""), data.get("Universidad doctorado", ""))
+                        data["Area"] = area
                     
                     # Asegurar que no hay valores vacíos
                     for k in data:
