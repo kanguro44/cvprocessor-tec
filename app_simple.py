@@ -35,6 +35,17 @@ st.set_page_config(
 def check_password():
     """Retorna `True` si el usuario tiene la contraseña correcta."""
     def password_entered():
+        # Verificar si la clave "password" existe en los secretos
+        if "password" not in st.secrets:
+            st.error("Error: La clave 'password' no está configurada en los secretos de Streamlit.")
+            st.info("Administrador: Verifica la configuración de secretos en Streamlit Cloud.")
+            st.code("""
+# Ejemplo de configuración de secretos:
+password = "cvprocessor2025"
+            """)
+            st.session_state["password_correct"] = False
+            return
+            
         if st.session_state["password"] == st.secrets["password"]:
             st.session_state["password_correct"] = True
             del st.session_state["password"]  # No guardar la contraseña
