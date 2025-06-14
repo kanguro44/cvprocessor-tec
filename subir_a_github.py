@@ -192,8 +192,11 @@ def main():
         return False
     
     # Solicitar credenciales
-    usuario = "kanguro44"  # Reemplaza con tu usuario de GitHub
-    token = input("Ingresa tu token de GitHub (o contraseña): ")
+    usuario = "kanguro44"  # Usuario de GitHub
+    print_color("\nGitHub ya no permite la autenticación con contraseña. Necesitas un token de acceso personal.", "yellow")
+    print_color("Para crear un token, ve a: https://github.com/settings/tokens", "yellow")
+    print_color("Selecciona 'Generate new token (classic)' y asegúrate de darle permisos de 'repo'", "yellow")
+    token = input("\nIngresa tu token de acceso personal de GitHub: ")
     nombre_repo = "cvprocessor-tec"
     
     # Inicializar repositorio
